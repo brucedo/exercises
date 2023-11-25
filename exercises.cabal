@@ -1,4 +1,4 @@
-cabal-version:       3.0
+cabal-version:       2.4
 name:                exercises
 version:             0.0.1.0
 synopsis:            Exercises for the Haskell Beginners 2022 course
@@ -14,14 +14,14 @@ maintainer:          Haskell Beginners 2022 Course <haskell.beginners2022@gmail.
 copyright:           2021-2022 Haskell Beginners 2022 Course
 build-type:          Simple
 extra-doc-files:     README.md
-tested-with:         GHC == 9.2.5
+tested-with:         GHC == 9.4.7
 
 source-repository head
   type:                git
   location:            https://github.com/haskell-beginners-2022/exercises.git
 
 common common-options
-  build-depends:       base >= 4.14 && < 4.17
+  build-depends:       base >= 4.14 && <= 4.17.2.0
 
   ghc-options:         -Wall
                        -Wcompat
