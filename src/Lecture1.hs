@@ -90,6 +90,7 @@ minmax x y z = largest - smallest
     where 
         largest = max x (max y z) 
         smallest = min x (min y z)
+
 {- | Implement a function that takes a string, start and end positions
 and returns a substring of a given string from the start position to
 the end (including).
@@ -111,7 +112,7 @@ subString start end str
     | null str = []
     | otherwise = take slice (drop start_idx str)
     where 
-        slice = end - start + 1
+        slice = end - start_idx + 1
         start_idx = max start 0
 
 
@@ -144,4 +145,10 @@ and lower than 6 elements (4, 5, 6, 7, 8 and 9).
 🕯 HINT: Use recursion to implement this function.
 -}
 lowerAndGreater :: Int -> [Int] -> [Char]
-lowerAndGreater n list = error "TODO"
+lowerAndGreater n list = 
+    let lowerNum = length lower; higherNum = length higher
+    in 
+        show n ++ " is greater than " ++ show lowerNum ++ " elements and lower than " ++ show higherNum ++ " elements"
+    where 
+        lower = filter (< n) list 
+        higher = filter (> n) list
