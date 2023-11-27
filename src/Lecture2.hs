@@ -52,7 +52,9 @@ zero, you can stop calculating product and return 0 immediately.
 84
 -}
 lazyProduct :: [Int] -> Int
-lazyProduct = error "TODO"
+lazyProduct [] = 1
+lazyProduct (0 : _) = 0
+lazyProduct (next : rest) = next * lazyProduct rest
 
 {- | Implement a function that duplicates every element in the list.
 
@@ -62,7 +64,8 @@ lazyProduct = error "TODO"
 "ccaabb"
 -}
 duplicate :: [a] -> [a]
-duplicate = error "TODO"
+duplicate [] = []
+duplicate (current : rest) = current : current : duplicate rest
 
 {- | Implement function that takes index and a list and removes the
 element at the given position. Additionally, this function should also
@@ -74,7 +77,12 @@ return the removed element.
 >>> removeAt 10 [1 .. 5]
 (Nothing,[1,2,3,4,5])
 -}
-removeAt = error "TODO"
+removeAt :: Int -> [Int] -> (Maybe Int, [Int])
+removeAt _ [] = (Nothing, [])
+removeAt 0 (current : rest) = (Just current, rest)
+removeAt x (current : rest) = case removeAt (x - 1) rest of 
+  (Just removed, after) -> (Just removed, after)
+  (Nothing, after) -> (Nothing, current : after)
 
 {- | Write a function that takes a list of lists and returns only
 lists of even lengths.
@@ -85,7 +93,8 @@ lists of even lengths.
 ♫ NOTE: Use eta-reduction and function composition (the dot (.) operator)
   in this function.
 -}
-evenLists = error "TODO"
+evenLists :: [[Int]] -> [[Int]]
+evenLists = filter ((== 0) . flip mod 4 . length)
 
 {- | The @dropSpaces@ function takes a string containing a single word
 or number surrounded by spaces and removes all leading and trailing
@@ -101,7 +110,8 @@ spaces.
 
 🕯 HINT: look into Data.Char and Prelude modules for functions you may use.
 -}
-dropSpaces = error "TODO"
+dropSpaces :: [Char] -> [Char]
+dropSpaces = head . words
 
 {- |
 
