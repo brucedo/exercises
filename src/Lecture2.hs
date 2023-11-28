@@ -77,12 +77,16 @@ return the removed element.
 >>> removeAt 10 [1 .. 5]
 (Nothing,[1,2,3,4,5])
 -}
-removeAt :: Int -> [Int] -> (Maybe Int, [Int])
+removeAt :: Int -> [i] -> (Maybe i, [i])
 removeAt _ [] = (Nothing, [])
+removeAt (-1) input = (Nothing, input)
 removeAt 0 (current : rest) = (Just current, rest)
-removeAt x (current : rest) = case removeAt (x - 1) rest of 
-  (Just removed, after) -> (Just removed, after)
-  (Nothing, after) -> (Nothing, current : after)
+removeAt x (current : rest) = 
+  let result = removeAt (x - 1) rest in 
+  (fst result, current : snd result)
+-- removeAt x (current : rest) = case removeAt (x - 1) rest of 
+--   (Just removed, after) -> (Just removed, current : after)
+--   (Nothing, after) -> (Nothing, current : after)
 
 {- | Write a function that takes a list of lists and returns only
 lists of even lengths.
@@ -93,8 +97,8 @@ lists of even lengths.
 ♫ NOTE: Use eta-reduction and function composition (the dot (.) operator)
   in this function.
 -}
-evenLists :: [[Int]] -> [[Int]]
-evenLists = filter ((== 0) . flip mod 4 . length)
+evenLists :: [[a]] -> [[a]]
+evenLists = filter ((== 0) . flip mod 2 . length)
 
 {- | The @dropSpaces@ function takes a string containing a single word
 or number surrounded by spaces and removes all leading and trailing
@@ -195,7 +199,9 @@ False
 True
 -}
 isIncreasing :: [Int] -> Bool
-isIncreasing = error "TODO"
+isIncreasing [] = True
+isIncreasing [_] = True
+isIncreasing (x : y : rest) = x <= y && isIncreasing (y : rest)
 
 {- | Implement a function that takes two lists, sorted in the
 increasing order, and merges them into new list, also sorted in the
@@ -208,7 +214,12 @@ verify that.
 [1,2,3,4,7]
 -}
 merge :: [Int] -> [Int] -> [Int]
-merge = error "TODO"
+merge [] [] = []
+merge left [] = left
+merge [] right = right
+merge (left_head : left) (right_head : right)
+  | left_head < right_head = left_head : merge left (right_head : right)
+  | otherwise = right_head : merge (left_head : left) right
 
 {- | Implement the "Merge Sort" algorithm in Haskell. The @mergeSort@
 function takes a list of numbers and returns a new list containing the
@@ -225,7 +236,12 @@ The algorithm of merge sort is the following:
 [1,2,3]
 -}
 mergeSort :: [Int] -> [Int]
-mergeSort = error "TODO"
+mergeSort [] = []
+mergeSort [x] = [x]
+mergeSort unsorted = merge (mergeSort left) (mergeSort right)
+  where 
+    split_point = div (length unsorted) 2
+    (left, right) = splitAt split_point unsorted
 
 
 {- | Haskell is famous for being a superb language for implementing
