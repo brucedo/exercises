@@ -16,33 +16,32 @@ Unlike exercises to Lecture 1, this module also contains more
 challenging exercises. You don't need to solve them to finish the
 course but you can if you like challenges :)
 -}
+module Lecture2 (
+  -- * Normal
+  lazyProduct,
+  duplicate,
+  removeAt,
+  evenLists,
+  dropSpaces,
+  Knight (..),
+  dragonFight,
 
-module Lecture2
-    ( -- * Normal
-      lazyProduct
-    , duplicate
-    , removeAt
-    , evenLists
-    , dropSpaces
+  -- * Hard
+  isIncreasing,
+  merge,
+  mergeSort,
+  Expr (..),
+  Variables,
+  EvalError (..),
+  eval,
+  constantFolding,
+) where
 
-    , Knight (..)
-    , dragonFight
-
-      -- * Hard
-    , isIncreasing
-    , merge
-    , mergeSort
-
-    , Expr (..)
-    , Variables
-    , EvalError (..)
-    , eval
-    , constantFolding
-    ) where
+import Control.Arrow (ArrowChoice (left))
 
 -- VVV If you need to import libraries, do it after this line ... VVV
 
--- ^^^ and before this line. Otherwise the test suite might fail  ^^^
+-- ^ ^^ and before this line. Otherwise the test suite might fail  ^^^
 
 {- | Implement a function that finds a product of all the numbers in
 the list. But implement a lazier version of this function: if you see
@@ -81,10 +80,11 @@ removeAt :: Int -> [i] -> (Maybe i, [i])
 removeAt _ [] = (Nothing, [])
 removeAt (-1) input = (Nothing, input)
 removeAt 0 (current : rest) = (Just current, rest)
-removeAt x (current : rest) = 
-  let result = removeAt (x - 1) rest in 
-  (fst result, current : snd result)
--- removeAt x (current : rest) = case removeAt (x - 1) rest of 
+removeAt x (current : rest) =
+  let result = removeAt (x - 1) rest
+   in (fst result, current : snd result)
+
+-- removeAt x (current : rest) = case removeAt (x - 1) rest of
 --   (Just removed, after) -> (Just removed, current : after)
 --   (Nothing, after) -> (Nothing, current : after)
 
@@ -173,10 +173,10 @@ You're free to define any helper functions.
 
 -- some help in the beginning ;)
 data Knight = Knight
-    { knightHealth    :: Int
-    , knightAttack    :: Int
-    , knightEndurance :: Int
-    }
+  { knightHealth :: Int
+  , knightAttack :: Int
+  , knightEndurance :: Int
+  }
 
 dragonFight = error "TODO"
 
@@ -239,10 +239,9 @@ mergeSort :: [Int] -> [Int]
 mergeSort [] = []
 mergeSort [x] = [x]
 mergeSort unsorted = merge (mergeSort left) (mergeSort right)
-  where 
-    split_point = div (length unsorted) 2
-    (left, right) = splitAt split_point unsorted
-
+ where
+  split_point = div (length unsorted) 2
+  (left, right) = splitAt split_point unsorted
 
 {- | Haskell is famous for being a superb language for implementing
 compilers and interpreters to other programming languages. In the next
@@ -255,10 +254,10 @@ Such expressions can be represented in a more structured way (than a
 string) using the following recursive Algebraic Data Type:
 -}
 data Expr
-    = Lit Int
-    | Var String
-    | Add Expr Expr
-    deriving (Show, Eq)
+  = Lit Int
+  | Var String
+  | Add Expr Expr
+  deriving (Show, Eq)
 
 {- Now, you can use this data type to describe such expressions:
 
@@ -286,25 +285,23 @@ Normally, this would be a sum type with several constructors
 describing all possible errors. But we have only one error in our
 evaluation process.
 -}
-data EvalError
-    = VariableNotFound String
-    deriving (Show, Eq)
+newtype EvalError
+  = VariableNotFound String
+  deriving (Show, Eq)
 
 {- | Having all this set up, we can finally implement an evaluation function.
 It returns either a successful evaluation result or an error.
 -}
 eval :: Variables -> Expr -> Either EvalError Int
-eval context expr = case expr of 
+eval context expr = case expr of
   Lit value -> Right value
-  Var varName ->  case lookup varName context of 
-                    Nothing -> Left (VariableNotFound varName)
-                    Just result -> Right result
-  Add leftOp rightOp -> case (eval context leftOp, eval context rightOp) of 
-                          (Right leftConst, Right rightConst) -> Right (leftConst + rightConst)
-                          (Left poop, _) -> Left poop
-                          (_, Left poop) -> Left poop
-
-
+  Var varName -> case lookup varName context of
+    Nothing -> Left (VariableNotFound varName)
+    Just result -> Right result
+  Add leftOp rightOp -> case (eval context leftOp, eval context rightOp) of
+    (Right leftConst, Right rightConst) -> Right (leftConst + rightConst)
+    (Left poop, _) -> Left poop
+    (_, Left poop) -> Left poop
 
 {- | Compilers also perform optimizations! One of the most common
 optimizations is "Constant Folding". It performs arithmetic operations
@@ -328,4 +325,22 @@ Write a function that takes and expression and performs "Constant
 Folding" optimization on the given expression.
 -}
 constantFolding :: Expr -> Expr
-constantFolding = error "TODO"
+constantFolding expr = case constant of
+  0 -> noConstantsExpr
+  num -> Add noConstantsExpr (Lit num)
+ where
+  (noConstantsExpr, constant) = foldTree expr
+
+foldTree :: Expr -> (Expr, Int)
+foldTree (Lit value) = (Lit value, 0)
+foldTree (Var var) = (Var var, 0)
+foldTree (Add exprLeft exprRight) = reconstituteTree foldedLeft foldedRight
+ where
+  foldedLeft = foldTree exprLeft
+  foldedRight = foldTree exprRight
+
+reconstituteTree :: (Expr, Int) -> (Expr, Int) -> (Expr, Int)
+reconstituteTree (Lit leftValue, leftConstant) (Lit rightValue, rightConstant) = (Lit (leftValue + leftConstant + rightValue + rightConstant), 0)
+reconstituteTree (Lit leftValue, leftConstant) (expr, rightConstant) = (expr, leftValue + leftConstant + rightConstant)
+reconstituteTree (expr, leftConstant) (Lit rightValue, rightConstant) = (expr, leftConstant + rightValue + rightConstant)
+reconstituteTree (leftExpr, leftConstant) (rightExpr, rightConstant) = (Add leftExpr rightExpr, leftConstant + rightConstant)
