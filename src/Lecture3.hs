@@ -16,43 +16,40 @@ In this module you're going to practice standard Haskell typeclasses:
   * Using typeclasses methods
   * Implementing instances manually
   * Becoming friends with Semigroup, Monoid, Foldable and Functor typeclasses!
-
 -}
-
-module Lecture3
-    ( Weekday (..)
-    , toShortString
-    , next
-    , daysTo
-
-    , Gold (..)
-    , Reward (..)
-    , List1 (..)
-    , Treasure (..)
-
-    , appendDiff3
-    , apply
-    ) where
+module Lecture3 (
+  Weekday (..),
+  toShortString,
+  next,
+  daysTo,
+  Gold (..),
+  Reward (..),
+  List1 (..),
+  Treasure (..),
+  appendDiff3,
+  apply,
+) where
 
 -- VVV If you need to import libraries, do it after this line ... VVV
 
--- ^^^ and before this line. Otherwise the test suite might fail  ^^^
+-- ^ ^^ and before this line. Otherwise the test suite might fail  ^^^
 
--- $setup
--- >>> import Data.Semigroup
+{- $setup
+>>> import Data.Semigroup
+-}
 
 {- | Let's define a simple enumeration data type for representing days
 of the week.
 -}
 data Weekday
-    = Monday
-    | Tuesday
-    | Wednesday
-    | Thursday
-    | Friday
-    | Saturday
-    | Sunday
-    deriving (Show, Eq)
+  = Monday
+  | Tuesday
+  | Wednesday
+  | Thursday
+  | Friday
+  | Saturday
+  | Sunday
+  deriving (Show, Eq, Enum, Bounded)
 
 {- | Write a function that will display only the first three letters
 of a weekday.
@@ -60,7 +57,8 @@ of a weekday.
 >>> toShortString Monday
 "Mon"
 -}
-toShortString = error "TODO"
+toShortString :: Weekday -> String
+toShortString weekday = take 3 $ show weekday
 
 {- | Write a function that returns next day of the week, following the
 given day.
@@ -82,7 +80,8 @@ Tuesday
   would work for **any** enumeration type in Haskell (e.g. 'Bool',
   'Ordering') and not just 'Weekday'?
 -}
-next = error "TODO"
+next :: Weekday -> Weekday
+next weekday = if weekday == (maxBound :: Weekday) then minBound :: Weekday else succ weekday
 
 {- | Implement a function that calculates number of days from the first
 weekday to the second.
@@ -92,7 +91,8 @@ weekday to the second.
 >>> daysTo Friday Wednesday
 5
 -}
-daysTo = error "TODO"
+daysTo :: Weekday -> Weekday -> Int
+daysTo first second = abs $ (`mod` 7) $ (`subtract` 7) $ fromEnum first - fromEnum second
 
 {-
 
@@ -103,15 +103,14 @@ have a lawful 'Monoid' instance.
 -}
 
 newtype Gold = Gold
-    { unGold :: Int
-    } deriving (Show, Eq)
+  { unGold :: Int
+  }
+  deriving (Show, Eq)
 
 -- | Addition of gold coins.
-instance Semigroup Gold where
+instance Semigroup Gold
 
-
-instance Monoid Gold where
-
+instance Monoid Gold
 
 {- | A reward for completing a difficult quest says how much gold
 you'll receive and whether you'll get a special reward.
@@ -120,24 +119,21 @@ If you combine multiple rewards, the final reward will contain a
 special prize if at least one of the rewards is special.
 -}
 data Reward = Reward
-    { rewardGold    :: Gold
-    , rewardSpecial :: Bool
-    } deriving (Show, Eq)
+  { rewardGold :: Gold
+  , rewardSpecial :: Bool
+  }
+  deriving (Show, Eq)
 
-instance Semigroup Reward where
+instance Semigroup Reward
 
+instance Monoid Reward
 
-instance Monoid Reward where
-
-
-{- | 'List1' is a list that contains at least one element.
--}
+-- | 'List1' is a list that contains at least one element.
 data List1 a = List1 a [a]
-    deriving (Show, Eq)
+  deriving (Show, Eq)
 
 -- | This should be list append.
-instance Semigroup (List1 a) where
-
+instance Semigroup (List1 a)
 
 {- | Does 'List1' have the 'Monoid' instance? If no then why?
 
@@ -148,9 +144,9 @@ instance Monoid (List1 a) where
 don't.
 -}
 data Treasure a
-    = NoTreasure
-    | SomeTreasure a
-    deriving (Show, Eq)
+  = NoTreasure
+  | SomeTreasure a
+  deriving (Show, Eq)
 
 {- | When you append multiple treasures for fighting multiple
 monsters, you should get a combined treasure and not just the first
@@ -159,11 +155,9 @@ monsters, you should get a combined treasure and not just the first
 🕯 HINT: You may need to add additional constraints to this instance
   declaration.
 -}
-instance Semigroup (Treasure a) where
+instance Semigroup (Treasure a)
 
-
-instance Monoid (Treasure a) where
-
+instance Monoid (Treasure a)
 
 {- | Abstractions are less helpful if we can't write functions that
 use them!
@@ -179,7 +173,6 @@ together only different elements.
 [1,2,3,4,5]
 >>> appendDiff3 (Product 2) (Product 3) (Product 3)
 Product {getProduct = 6}
-
 -}
 appendDiff3 = error "TODO"
 
@@ -247,6 +240,5 @@ Nothing
 Just [8,9,10]
 >>> apply 5 [(+ 3), (* 4), div 17]
 [8,20,3]
-
 -}
 apply = error "TODO"
